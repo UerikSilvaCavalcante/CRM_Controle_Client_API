@@ -48,6 +48,7 @@ jobs:
           echo "DB_PORT=5432" >> .env
           echo "DB_USER=api" >> .env
           echo "DB_NAME=db" >> .env
+          echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" > .env
 
       - name: Aguardar PostgreSQL estar disponível
         env:
