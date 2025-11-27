@@ -18,6 +18,14 @@ jobs:
         with:
           python-version: 3.12.3
 
+      - name: Mask DB_PASSWORD
+        run: |
+          echo "::add-mask::DB_PASSWORD=${{ secrets.DB_PASSWORD }}"
+
+      - name: Criar .env file
+        working-directory: .
+        run: echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" > .env
+
       - name: Preparando ambiente
         run: |
           python -m pip install --upgrade pip
