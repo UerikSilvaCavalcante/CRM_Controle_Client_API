@@ -1,3 +1,7 @@
+"""
+Serializer para o modelo Clientes
+"""
+
 from rest_framework import serializers
 from clientes.models import Clientes
 from nota.models import Nota
@@ -17,11 +21,14 @@ class ClienteSerializer(serializers.ModelSerializer):
     """
 
     class Meta:
+        """
+        Meta class para configurar o serializer
+        """
+
         model = Clientes
         fields = "__all__"
 
         read_only_fields = ["created_at"]
-        write_only_fields = ["responsavel"]
 
     created_at = serializers.SerializerMethodField()
     vendedor = serializers.ReadOnlyField(source="responsavel.username")
@@ -74,6 +81,15 @@ class ClienteSerializer(serializers.ModelSerializer):
         return obj.created_at.strftime("%d/%m/%Y")
 
     def get_notas(self, obj):
+        """
+        Retorna as notas do cliente
+
+        Parametros
+        - obj: Clientes - Instancia do modelo Clientes
+
+        Retorno
+        - notas: list - Lista de notas
+        """
         notas = Nota.objects.filter(cliente__id=obj.pk).all()
         if notas:
             notas_serializers = NotaSerializer(notas, many=True).data

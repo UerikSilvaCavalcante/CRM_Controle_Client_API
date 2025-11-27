@@ -1,0 +1,6 @@
+[MASTER]
+load-plugins=pylint_django
+django-settings-module=setup.settings
+
+[MESSAGES CONTROL]
+disable=too-many-instance-attributes,
