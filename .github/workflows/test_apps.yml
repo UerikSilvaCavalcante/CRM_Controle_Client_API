@@ -57,7 +57,7 @@ jobs:
       - name: Aguardar PostgreSQL estar disponível
         run: |
           for i in {1..30}; do
-            sudo -u postgres psql -c "SELECT 1 FROM pg_user WHERE usename = 'api'" && break
+            sudo -u postgres psql -c "SELECT 1 FROM pg_stat_activity WHERE datname = 'db'" && break
             echo "Waiting for POSTGRESQL..."
             sleep 2
           done
