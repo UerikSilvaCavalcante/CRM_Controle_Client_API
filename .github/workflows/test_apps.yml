@@ -57,8 +57,8 @@ jobs:
       - name: Aguardar PostgreSQL estar disponível
         run: |
           for i in {1..30}; do
-            nc -z localhost 5432 && break
-            echo "Waiting for MongoDB..."
+            sudo -u postgres psql -c "SELECT 1 FROM pg_user WHERE usename = 'api'" && break
+            echo "Waiting for POSTGRESQL..."
             sleep 2
           done
 
