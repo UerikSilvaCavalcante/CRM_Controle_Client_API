@@ -1,0 +1,48 @@
+name: Teste do projeto
+
+on:
+  push:
+    branches: [tests]
+  pull_request:
+    branches: [tests]
+
+jobs:
+  test-client-app:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout de codigo
+        uses: actions/checkout@v2
+
+      - name: Configurar Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.12.3
+
+      - name: Preparando ambiente
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Executando testes
+        working-directory: ./clientes
+        run: |
+          pytest -v
+
+      - name: Avaliando Complexidade de Código
+        working-directory: ./clientes
+        run: |
+          radon cc -a .
+      - name: Avaliando Qualidade de Código no models
+        working-directory: ./
+        run: |
+          pylint ./clientes/models.py
+
+      - name: Avaliando Qualidade de Código no serializers
+        working-directory: ./
+        run: |
+          pylint ./clientes/serializers.py
+
+      - name: Avaliando Qualidade de Código no views
+        working-directory: ./
+        run: |
+          pylint ./clientes/views.py

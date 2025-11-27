@@ -1,3 +1,7 @@
+"""
+Modelo de Clientes
+"""
+
 from django.db import models
 from django.contrib.auth.models import User
 
@@ -16,7 +20,7 @@ class Clientes(models.Model):
     - created_at: datetime - Data de criação do cliente
     """
 
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, blank=False, null=False)
     email = models.EmailField(unique=True)
     phone = models.CharField(max_length=20)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -25,4 +29,5 @@ class Clientes(models.Model):
     )
 
     def __str__(self) -> str:
+        """Retorna o nome do cliente e o email"""
         return f"{self.name} - {self.email}"

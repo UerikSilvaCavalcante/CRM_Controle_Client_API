@@ -1,9 +1,11 @@
+"""Views do modulo clientes"""
+
 from rest_framework import viewsets, filters
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.authentication import TokenAuthentication, BasicAuthentication
+from rest_framework.permissions import IsAuthenticated
 from clientes.models import Clientes
 from clientes.serializers import ClienteSerializer
-from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.authentication import TokenAuthentication, BasicAuthentication
 
 
 # Create your views here.
@@ -38,10 +40,16 @@ class ClientesViewSet(viewsets.ModelViewSet):
     serializer_class = ClienteSerializer
 
     def get_queryset(self):  # type: ignore
-        queryset = (
-            Clientes.objects.filter(responsavel=self.request.user)
-            .order_by("created_at")
-            .all()
-        )
+        """
+        Retorna os clientes do usuário logado
+
+        """
+        if self.request.user.is_superuser:
+            queryset = Clientes.objects.all()
+        else:
+            queryset = (
+                Clientes.objects.filter(responsavel=self.request.user)
+                .order_by("created_at")
+                .all()
+            )
         return queryset
-    
