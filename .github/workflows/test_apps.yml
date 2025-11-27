@@ -9,6 +9,24 @@ on:
 jobs:
   test-client-app:
     runs-on: ubuntu-latest
+
+    # Configurar PostgreSQL como serviço
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: api
+          POSTGRES_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          POSTGRES_DB: db
+          POSTGRES_INITDB_ARGS: "-c client_encoding=UTF8"
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
     steps:
       - name: Checkout de codigo
         uses: actions/checkout@v2
@@ -24,12 +42,44 @@ jobs:
 
       - name: Criar .env file
         working-directory: .
-        run: echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" > .env
+        run: |
+          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" > .env
+          echo "DB_HOST=localhost" >> .env
+          echo "DB_PORT=5432" >> .env
+          echo "DB_USER=api" >> .env
+          echo "DB_NAME=db" >> .env
 
       - name: Preparando ambiente
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+
+      - name: Aguardar PostgreSQL estar disponível
+        run: |
+          python -c "
+          import psycopg2
+          import time
+          import sys
+          for i in range(30):
+            try:
+              psycopg2.connect(
+                host='localhost',
+                user='api',
+                password='${{ secrets.DB_PASSWORD }}',
+                database='db',
+                port=5432
+              )
+              print('PostgreSQL está disponível!')
+              sys.exit(0)
+            except:
+              print(f'Tentativa {i+1}: PostgreSQL ainda não está pronto...')
+              time.sleep(1)
+          print('PostgreSQL não ficou disponível em tempo')
+          sys.exit(1)
+          "
+
+      - name: Executando migrate
+        run: python manage.py migrate
 
       - name: Executando testes
         working-directory: ./clientes
