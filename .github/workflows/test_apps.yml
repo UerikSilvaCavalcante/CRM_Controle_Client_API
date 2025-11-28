@@ -71,12 +71,12 @@ jobs:
           pip install -r requirements.txt
 
       - name: Executando testes
-        working-directory: ./notas
+        working-directory: ./nota
         run: |
           pytest -v
 
       - name: Avaliando Complexidade de Código
-        working-directory: ./notas
+        working-directory: ./nota
         run: |
           radon cc -a .
   test-auth-app:
@@ -107,11 +107,11 @@ jobs:
           pip install -r requirements.txt
 
       - name: Executando testes
-        working-directory: ./auth
+        working-directory: ./auth_user
         run: |
           pytest -v
 
       - name: Avaliando Complexidade de Código
-        working-directory: ./auth
+        working-directory: ./auth_user
         run: |
           radon cc -a .
