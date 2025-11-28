@@ -3,6 +3,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 from pathlib import Path
+from urllib.parse import urlparse, parse_qsl
+import sys
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -74,17 +76,30 @@ WSGI_APPLICATION = "setup.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-DATABASES = {
-    "default": {
-        #'ENGINE': 'django.db.backends.sqlite3',
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": "db",
-        "USER": "api",
-        "PASSWORD": str(os.getenv("DB_PASSWORD")),
-        "HOST": "localhost",
-        "PORT": "5432",
+tmpPostgres = urlparse(str(os.getenv("DATABASE_URL")))
+# Detecta se está rodando testes
+TESTING = "pytest" in sys.modules or "test" in sys.argv
+
+if TESTING:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": ":memory:",  # Banco em memória, super rápido
+        }
     }
-}
+else:
+    DATABASES = {
+        "default": {
+            #'ENGINE': 'django.db.backends.sqlite3',
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": tmpPostgres.path.replace("/", ""),  # type: ignore
+            "USER": tmpPostgres.username,
+            "PASSWORD": tmpPostgres.password,
+            "HOST": tmpPostgres.hostname,
+            "PORT": 5432,
+            "OPTIONS": dict(parse_qsl(tmpPostgres.query)),  # type: ignore
+        }
+    }
 
 
 # Password validation

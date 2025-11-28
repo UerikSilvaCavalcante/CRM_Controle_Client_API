@@ -11,21 +11,6 @@ jobs:
     runs-on: ubuntu-latest
 
     # Configurar PostgreSQL como serviço
-    services:
-      postgres:
-        image: postgres:18
-        env:
-          POSTGRES_USER: api
-          POSTGRES_PASSWORD: ${{ secrets.DB_PASSWORD }}
-          POSTGRES_DB: db
-          POSTGRES_INITDB_ARGS: "-c client_encoding=UTF8"
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 5432:5432
 
     steps:
       - name: Checkout de codigo
@@ -38,27 +23,12 @@ jobs:
 
       - name: Mask DB_PASSWORD
         run: |
-          echo "::add-mask::DB_PASSWORD=${{ secrets.DB_PASSWORD }}"
+          echo "::add-mask::DATABASE_URL=${{ secrets.DATABASE_URL }}"
 
       - name: Criar .env file
         working-directory: .
         run: |
-          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" > .env
-          echo "DB_HOST=localhost" >> .env
-          echo "DB_PORT=5432" >> .env
-          echo "DB_USER=api" >> .env
-          echo "DB_NAME=db" >> .env
-          echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> .env
-
-      - name: Aguardar PostgreSQL estar disponível
-        env:
-          PGPASSWORD: ${{ secrets.DB_PASSWORD }}
-        run: |
-          for i in {1..30}; do
-            psql -h localhost -U api -d db -c "SELECT 1" && break
-            echo "Tentativa $i: Aguardando PostgreSQL..."
-            sleep 1
-          done
+          echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" > .env
 
       - name: Preparando ambiente
         run: |

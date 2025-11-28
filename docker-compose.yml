@@ -1,0 +1,45 @@
+version: '3.9'
+
+services:
+  postgres:
+    image: bitnami/postgresql:latest
+    ports:
+      - "5433:5432"
+    environment:
+      - POSTGRES_USER=api
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=db
+    volumes:
+      - postgres-data:/bitnami/postgresql
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "api"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - db-network
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: api
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    
+    env_file:
+      - .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - db-network
+    command: bash -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+
+volumes:
+  postgres-data:
+    driver: local
+
+networks:
+  db-network:
+    driver: bridge
