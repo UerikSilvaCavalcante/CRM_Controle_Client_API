@@ -43,75 +43,75 @@ jobs:
         working-directory: ./clientes
         run: |
           radon cc -a .
-    test-nota-app:
-      runs-on: ubuntu-latest
+  test-nota-app:
+    runs-on: ubuntu-latest
 
-      steps:
-        - name: Checkout de codigo
-          uses: actions/checkout@v2
+    steps:
+      - name: Checkout de codigo
+        uses: actions/checkout@v2
 
-        - name: Configurar Python
-          uses: actions/setup-python@v2
-          with:
-            python-version: 3.12.3
+      - name: Configurar Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.12.3
 
-        - name: Mask DATABASE_URL
-          run: |
-            echo "::add-mask::DATABASE_URL=${{ secrets.DATABASE_URL }}"
+      - name: Mask DATABASE_URL
+        run: |
+          echo "::add-mask::DATABASE_URL=${{ secrets.DATABASE_URL }}"
 
-        - name: Criar .env file
-          working-directory: .
-          run: |
-            echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" > .env
-            echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> .env
+      - name: Criar .env file
+        working-directory: .
+        run: |
+          echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" > .env
+          echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> .env
 
-        - name: Preparando ambiente
-          run: |
-            python -m pip install --upgrade pip
-            pip install -r requirements.txt
+      - name: Preparando ambiente
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
 
-        - name: Executando testes
-          working-directory: ./notas
-          run: |
-            pytest -v
+      - name: Executando testes
+        working-directory: ./notas
+        run: |
+          pytest -v
 
-        - name: Avaliando Complexidade de Código
-          working-directory: ./notas
-          run: |
-            radon cc -a .
-      test-auth-app:
-        runs-on: ubuntu-latest
+      - name: Avaliando Complexidade de Código
+        working-directory: ./notas
+        run: |
+          radon cc -a .
+  test-auth-app:
+    runs-on: ubuntu-latest
 
-        steps:
-          - name: Checkout de codigo
-            uses: actions/checkout@v2
+    steps:
+      - name: Checkout de codigo
+        uses: actions/checkout@v2
 
-          - name: Configurar Python
-            uses: actions/setup-python@v2
-            with:
-              python-version: 3.12.3
+      - name: Configurar Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.12.3
 
-          - name: Mask DATABASE_URL
-            run: |
-              echo "::add-mask::DATABASE_URL=${{ secrets.DATABASE_URL }}"
+      - name: Mask DATABASE_URL
+        run: |
+          echo "::add-mask::DATABASE_URL=${{ secrets.DATABASE_URL }}"
 
-          - name: Criar .env file
-            working-directory: .
-            run: |
-              echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" > .env
-              echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> .env
+      - name: Criar .env file
+        working-directory: .
+        run: |
+          echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" > .env
+          echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> .env
 
-          - name: Preparando ambiente
-            run: |
-              python -m pip install --upgrade pip
-              pip install -r requirements.txt
+      - name: Preparando ambiente
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
 
-          - name: Executando testes
-            working-directory: ./auth
-            run: |
-              pytest -v
+      - name: Executando testes
+        working-directory: ./auth
+        run: |
+          pytest -v
 
-          - name: Avaliando Complexidade de Código
-            working-directory: ./auth
-            run: |
-              radon cc -a .
+      - name: Avaliando Complexidade de Código
+        working-directory: ./auth
+        run: |
+          radon cc -a .
