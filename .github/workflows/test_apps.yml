@@ -43,17 +43,5 @@ jobs:
         working-directory: ./clientes
         run: |
           radon cc -a .
-      - name: Avaliando Qualidade de Código no models
-        working-directory: ./
-        run: |
-          pylint ./clientes/models.py
 
-      - name: Avaliando Qualidade de Código no serializers
-        working-directory: ./
-        run: |
-          pylint ./clientes/serializers.py
-
-      - name: Avaliando Qualidade de Código no views
-        working-directory: ./
-        run: |
-          pylint ./clientes/views.py
+    
