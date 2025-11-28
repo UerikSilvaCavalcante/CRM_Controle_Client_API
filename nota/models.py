@@ -19,8 +19,10 @@ class Nota(models.Model):
     - updated_at: DateTimeField - Data de atualização da nota
     """
 
-    cliente = models.ForeignKey(Clientes, on_delete=models.CASCADE)
-    title = models.CharField(max_length=100)
+    cliente = models.ForeignKey(
+        Clientes, on_delete=models.CASCADE, null=False, blank=False
+    )
+    title = models.CharField(max_length=100, blank=False, null=False)
     description = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

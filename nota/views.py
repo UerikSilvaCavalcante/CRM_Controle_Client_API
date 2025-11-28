@@ -26,6 +26,12 @@ class NotaViewSet(viewsets.ModelViewSet):
     search_fields = ["cliente__id", "cliente__name"]
 
     def get_queryset(self):  # type: ignore
-        cliente = Clientes.objects.filter(responsavel=self.request.user).all()
-        queryset = Nota.objects.filter(cliente__in=cliente).order_by("created_at").all()
+        if self.request.user.is_superuser:
+            queryset = Nota.objects.all()
+        else:
+            queryset = (
+                Nota.objects.filter(cliente__responsavel=self.request.user)
+                .order_by("created_at")
+                .all()
+            )
         return queryset
