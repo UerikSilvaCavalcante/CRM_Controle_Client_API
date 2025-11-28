@@ -12,5 +12,5 @@ routers.registry.extend(nota_router.registry)
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/", include(routers.urls)),
-    path("api-auth/login/", CustomAuthToken.as_view()),
+    path("api-auth/login/", CustomAuthToken.as_view(), name="login"),
 ]

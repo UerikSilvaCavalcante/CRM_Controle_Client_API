@@ -11,7 +11,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../.
 
 import pytest
 from django.test import TestCase
-from django.core.exceptions import ValidationError
+from rest_framework.exceptions import ValidationError
 from auth_user.serializers import UserAuthSerializer
 
 
@@ -84,10 +84,6 @@ class TestAPITestCaseAuthUser(APITestCase):
             password="testpassword",
             email="superemail3124@example.com",
         )
-        Token.objects.get_or_create(user=self.user)
-        Token.objects.get_or_create(user=self.super_user)
-        self.token_user = Token.objects.get(user=self.user).key
-        self.token_super_user = Token.objects.get(user=self.super_user).key
 
     def test_login(self):
         """

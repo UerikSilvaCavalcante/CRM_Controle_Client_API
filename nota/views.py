@@ -1,7 +1,8 @@
 from rest_framework import viewsets, filters
 from nota.models import Nota
-from clientes.models import Clientes
 from nota.serializers import NotaSerializer
+from rest_framework.authentication import TokenAuthentication, BasicAuthentication
+from rest_framework.permissions import IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
 
 
@@ -17,6 +18,9 @@ class NotaViewSet(viewsets.ModelViewSet):
     Serializer: NotaSerializer
 
     """
+
+    authentication_classes = [BasicAuthentication, TokenAuthentication]
+    permission_classes = [IsAuthenticated]
 
     serializer_class = NotaSerializer
     filter_backends = [
