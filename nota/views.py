@@ -4,6 +4,9 @@ from nota.serializers import NotaSerializer
 from rest_framework.authentication import TokenAuthentication, BasicAuthentication
 from rest_framework.permissions import IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
+from nota.permissions import IsAdminOrVendedorOwner
+from auth_user.authenticate_cliente import ClienteAuthentication
+from rest_framework.exceptions import PermissionDenied
 
 
 # Create your views here.
@@ -19,8 +22,12 @@ class NotaViewSet(viewsets.ModelViewSet):
 
     """
 
-    authentication_classes = [BasicAuthentication, TokenAuthentication]
-    permission_classes = [IsAuthenticated]
+    authentication_classes = [
+        BasicAuthentication,
+        TokenAuthentication,
+        ClienteAuthentication,
+    ]
+    permission_classes = [IsAdminOrVendedorOwner]
 
     serializer_class = NotaSerializer
     filter_backends = [
@@ -30,11 +37,20 @@ class NotaViewSet(viewsets.ModelViewSet):
     search_fields = ["cliente__id", "cliente__name"]
 
     def get_queryset(self):  # type: ignore
-        if self.request.user.is_superuser:
-            queryset = Nota.objects.all()
+        if not isinstance(self.request.user, str):
+            if self.request.user.is_superuser:
+                queryset = Nota.objects.all()
+            elif self.request.user.groups.filter(name="Vendedor").exists():
+                queryset = (
+                    Nota.objects.filter(cliente__responsavel=self.request.user)
+                    .order_by("created_at")
+                    .all()
+                )
+            else:
+                raise PermissionDenied
         else:
             queryset = (
-                Nota.objects.filter(cliente__responsavel=self.request.user)
+                Nota.objects.filter(cliente__email=self.request.user)  # type: ignore
                 .order_by("created_at")
                 .all()
             )

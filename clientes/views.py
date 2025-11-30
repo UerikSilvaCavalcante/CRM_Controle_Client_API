@@ -6,6 +6,8 @@ from rest_framework.authentication import TokenAuthentication, BasicAuthenticati
 from rest_framework.permissions import IsAuthenticated
 from clientes.models import Clientes
 from clientes.serializers import ClienteSerializer
+from clientes.permissions import IsAdminOrVendedorOwner
+from rest_framework.exceptions import PermissionDenied
 
 
 # Create your views here.
@@ -28,7 +30,7 @@ class ClientesViewSet(viewsets.ModelViewSet):
     """
 
     authentication_classes = [BasicAuthentication, TokenAuthentication]
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAdminOrVendedorOwner]
 
     filter_backends = [
         DjangoFilterBackend,
@@ -46,10 +48,12 @@ class ClientesViewSet(viewsets.ModelViewSet):
         """
         if self.request.user.is_superuser:
             queryset = Clientes.objects.all()
-        else:
+        elif self.request.user.groups.filter(name="Vendedor").exists():
             queryset = (
                 Clientes.objects.filter(responsavel=self.request.user)
                 .order_by("created_at")
                 .all()
             )
+        else:
+            raise PermissionDenied
         return queryset
