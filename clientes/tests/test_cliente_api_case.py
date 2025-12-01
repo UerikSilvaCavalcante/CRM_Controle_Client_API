@@ -2,7 +2,9 @@
 """
 Testes do endpoint de clientes
 """
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group, Permission
+from django.contrib.contenttypes.models import ContentType
+
 from rest_framework.test import APITestCase, APIClient
 from rest_framework.authtoken.models import Token
 from django.urls import reverse
@@ -13,8 +15,6 @@ import sys
 # Configurar path do Django antes de importar modelos locais
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))
 from clientes.models import Clientes
-
-
 
 
 class ClientesAPITestCase(APITestCase):
@@ -32,6 +32,33 @@ class ClientesAPITestCase(APITestCase):
             password="testpassword",
             email="useremail3124@example.com",
         )
+        self.group, created = Group.objects.get_or_create(name="Vendedor")
+
+        permission_codenames = [
+            f"add_{Clientes._meta.model_name}",
+            f"change_{Clientes._meta.model_name}",
+            f"delete_{Clientes._meta.model_name}",
+            f"view_{Clientes._meta.model_name}",
+        ]
+
+        content_type = ContentType.objects.get_for_model(Clientes)
+        for codename in permission_codenames:
+            try:
+                permission = Permission.objects.get(
+                    codename=codename,
+                    content_type=content_type,
+                )
+                self.group.permissions.add(permission)
+            except Permission.DoesNotExist:
+                # Se não existir, cria (mas normalmente já existe)
+                permission = Permission.objects.create(
+                    name=codename.replace("_", " ").title(),
+                    codename=codename,
+                    content_type=content_type,
+                )
+                self.group.permissions.add(permission)
+
+        self.user.groups.add(self.group)
         self.super_user = User.objects.create_superuser(
             username="superuser",
             password="testpassword",
@@ -47,7 +74,6 @@ class ClientesAPITestCase(APITestCase):
             phone="1234567890",
             responsavel=self.user,
         )
-        
 
     def test_get_clientes_user(self):
         """
@@ -146,3 +172,32 @@ class ClientesAPITestCase(APITestCase):
         }
         response = self.client_auth.post(self.url, data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)  # type: ignore
+
+    def test_put_clientes(self):
+        """
+        Teste para verificar se o usuário pode atualizar um cliente
+        """
+
+        self.client_auth.force_authenticate(user=self.user)
+        data = {
+            "name": "Teste",
+            "email": "teste2@example.com",
+            "phone": "1234567890",
+            "responsavel": self.user.pk,
+        }
+        response = self.client_auth.put(f"{self.url}{self.cliente.pk}/", data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)  # type: ignore
+
+    def test_delete_cliente(self):
+        """
+        Teste para verificar se o usuário pode deletar um cliente
+        """
+        self.client_auth.force_authenticate(user=self.user)
+        new_cliente = Clientes.objects.create(
+            name="Teste",
+            email="2312541@example.com",
+            phone="1234567890",
+            responsavel=self.user,
+        )
+        response = self.client_auth.delete(f"{self.url}{new_cliente.pk}/")
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)  # type: ignore

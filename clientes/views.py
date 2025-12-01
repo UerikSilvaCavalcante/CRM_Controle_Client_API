@@ -1,5 +1,6 @@
 """Views do modulo clientes"""
 
+from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, filters
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.authentication import TokenAuthentication, BasicAuthentication
@@ -40,6 +41,11 @@ class ClientesViewSet(viewsets.ModelViewSet):
     ordering_fields = ["created_at", "id"]
     search_fields = ["name", "email", "phone", "id"]
     serializer_class = ClienteSerializer
+
+    def get_object(self):  # type: ignore
+        obj = get_object_or_404(self.get_queryset(), pk=self.kwargs["pk"])
+        self.check_object_permissions(self.request, obj)
+        return obj
 
     def get_queryset(self):  # type: ignore
         """
