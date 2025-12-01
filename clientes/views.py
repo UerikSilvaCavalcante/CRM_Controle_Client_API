@@ -47,11 +47,11 @@ class ClientesViewSet(viewsets.ModelViewSet):
 
         """
         if self.request.user.is_superuser:
-            queryset = Clientes.objects.all()
+            queryset = Clientes.objects.all().order_by("pk")
         elif self.request.user.groups.filter(name="Vendedor").exists():
             queryset = (
                 Clientes.objects.filter(responsavel=self.request.user)
-                .order_by("created_at")
+                .order_by("pk")
                 .all()
             )
         else:

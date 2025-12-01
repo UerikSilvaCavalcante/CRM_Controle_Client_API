@@ -17,7 +17,7 @@ class RedisService:
         return secrets.token_urlsafe(length)
 
     @staticmethod
-    def salvar_token(key, value, timeout=60):
+    def salvar_token(key, value, timeout=3600):
         """
         Salva um token no cache Redis
 

@@ -2,9 +2,9 @@ name: Teste do projeto
 
 on:
   push:
-    branches: [tests]
+    branches: [tests, dockerize]
   pull_request:
-    branches: [tests]
+    branches: [tests, dockerize]
 
 jobs:
   test-client-app:

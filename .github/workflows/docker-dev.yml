@@ -1,0 +1,87 @@
+name: Docker Dev Workflow
+
+on:
+  push:
+    branches: [dockerize]
+  pull_request:
+    branches: [dockerize]
+
+jobs:
+  docker-up:
+    runs-on: ubuntu-latest
+    steps:
+      # Clonar repositorio
+      - name: Checkout de codigo
+        uses: actions/checkout@v2
+
+      # Configurar docker Buildx
+      - name: Configurar Docker Build
+        uses: docker/setup-buildx-action@v1
+
+      # instalar o docker compose
+      - name: Instalar Docker Compose
+        run: |
+          if ! command -v docker-compose &> /dev/null; then
+            sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+            sudo chmod +x /usr/local/bin/docker-compose
+          fi
+          docker-compose --version
+
+      # Maskarar o DATABASE_URL
+      - name: Mask DATABASE_URL
+        run: |
+          echo "::add-mask::DATABASE_URL=${{ secrets.DATABASE_URL }}"
+
+      # Criar .env file
+      - name: Criar .env file
+        working-directory: .
+        run: |
+          echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" > .env
+          echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> .env
+
+      # Subir Conteiners
+      - name: Subir Conteiners do docker compose (Dev)
+        working-directory: .
+        run: |
+          docker-composer -f docker-compose.yml down -v --volumes
+          docker-compose -f docker-compose.yml up -d --build
+
+      # Verificar se o conteiner esta rodando
+      - name: Testar conteiners
+        working-directory: .
+        run: |
+          docker-compose -f docker-compose.yml ps
+
+      # Parar conteiners
+      - name: Parar conteiners
+        working-directory: .
+        run: |
+          docker-compose -f docker-compose.yml down -v
+
+      # Verificasão de vulnerabilidades com o Trivy (sem docker run)
+      - name: Instalar Trivy
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget
+          wget https://github.com/aquasecurity/trivy/releases/latest/download/trivy_0.65.0_Linux-64bit.deb
+          sudo dpkg -i trivy_0.65.0_Linux-64bit.deb
+
+      - name: Scan Api com Trivy
+        working-directory: .
+        run: |
+          trivy image --sereverity HIGH,CRITICAL desafio_pratico_mod_2_api:latest
+
+      # Verificasão de dependencias Python com o Safety (via Docker)
+      - name: Run Safety Check na API
+        working-directory: .
+        run: |
+          docker run --rm -v $PWD:/src python:3.12.3 bash -c "pip install safety && safety check -r /src/requirements.txt"
+
+      # Analise de código estatica com o CodeQL
+      - name: Run CodeQL Analysis
+        uses: github/codeql-action/init@v2
+        with:
+          languages: python
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v2
