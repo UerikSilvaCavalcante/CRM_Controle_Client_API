@@ -17,30 +17,19 @@ class IsAdminOrVendedorOwner(permissions.BasePermission):
 
             # Vendedor
             if request.user.groups.filter(name="Vendedor").exists():
-                return True
-
+                if request.method in ["POST", "PUT", "GET", "DELETE"]:
+                    return True
+                return False
             # Admin
             if request.user.is_superuser:
                 return True
 
             if request.method in permissions.SAFE_METHODS:
                 return True
+
         else:
-            return True
-
-        return False
-
-    def has_object_permission(self, request, view, obj):  # type: ignore
-
-        if request.user.groups.filter(name="Vendedor").exists():
-            if hasattr(obj, "usuario"):
-                return obj.usuario == request.user
-            return False
-
-        if request.user.is_superuser:
-            return True
-
-        if request.method in permissions.SAFE_METHODS:
+            if request.method != "GET":
+                return False
             return True
 
         return False

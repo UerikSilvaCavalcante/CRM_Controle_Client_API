@@ -1,3 +1,4 @@
+from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, filters
 from nota.models import Nota
 from nota.serializers import NotaSerializer
@@ -23,8 +24,8 @@ class NotaViewSet(viewsets.ModelViewSet):
     """
 
     authentication_classes = [
-        BasicAuthentication,
         TokenAuthentication,
+        BasicAuthentication,
         ClienteAuthentication,
     ]
     permission_classes = [IsAdminOrVendedorOwner]
@@ -35,6 +36,11 @@ class NotaViewSet(viewsets.ModelViewSet):
         filters.SearchFilter,
     ]
     search_fields = ["cliente__id", "cliente__name"]
+
+    def get_object(self):  # type: ignore
+        obj = get_object_or_404(self.get_queryset(), pk=self.kwargs["pk"])
+        self.check_object_permissions(self.request, obj)
+        return obj
 
     def get_queryset(self):  # type: ignore
         if not isinstance(self.request.user, str):

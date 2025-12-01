@@ -43,7 +43,7 @@ jobs:
       - name: Subir Conteiners do docker compose (Dev)
         working-directory: .
         run: |
-          docker-composer -f docker-compose.yml down -v --volumes
+          docker-compose -f docker-compose.yml down -v --volumes
           docker-compose -f docker-compose.yml up -d --build
 
       # Verificar se o conteiner esta rodando
