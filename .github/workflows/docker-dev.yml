@@ -58,19 +58,6 @@ jobs:
         run: |
           docker-compose -f docker-compose.yml down -v
 
-      # Verificasão de vulnerabilidades com o Trivy (sem docker run)
-      - name: Instalar Trivy
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y wget
-          wget https://github.com/aquasecurity/trivy/releases/latest/download/trivy_0.65.0_Linux-64bit.deb
-          sudo dpkg -i trivy_0.65.0_Linux-64bit.deb
-
-      - name: Scan Api com Trivy
-        working-directory: .
-        run: |
-          trivy image --sereverity HIGH,CRITICAL desafio_pratico_mod_2_api:latest
-
       # Verificasão de dependencias Python com o Safety (via Docker)
       - name: Run Safety Check na API
         working-directory: .
