@@ -1,24 +1,6 @@
 version: '3.9'
 
 services:
-  postgres:
-    image: bitnami/postgresql:latest
-    ports:
-      - "5433:5432"
-    environment:
-      - POSTGRES_USER=api
-      - POSTGRES_PASSWORD=${DB_PASSWORD}
-      - POSTGRES_DB=db
-    volumes:
-      - postgres-data:/bitnami/postgresql
-    healthcheck:
-      test: ["CMD", "pg_isready", "-U", "api"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-    networks:
-      - db-network
-
   # rodar imagem de um redis
   redis:
     image: redis:7-alpine
